@@ -1,0 +1,28 @@
+# ---
+# - name: Create new VM with minimal options
+#   community.general.proxmox_kvm:
+#     api_host: '{{ sops.pm_api_host }}'
+#     api_user: '{{ sops.pm_api_user }}'
+#     api_password: '{{ sops.pm_api_password }}'
+#     node: '{{ sops.pm_node }}'
+#     name: ansible-test-vm
+#     autostart: false
+#     cores: 1
+#     vcpus: 1
+#     memory: 2048
+#     sata:
+#       sata0: 'local-lvm:10,format=raw'
+#     ide:
+#       ide2: 'local:iso/kali-linux-2024.1-installer-amd64.iso,media=cdrom'
+#     net:
+#       net0: 'virtio,bridge=vmbr0'
+
+
+# - name: Start ansible-test vm
+#   community.general.proxmox_kvm:
+#     api_host: '{{ sops.pm_api_host }}'
+#     api_user: '{{ sops.pm_api_user }}'
+#     api_password: '{{ sops.pm_api_password }}'
+#     node: '{{ sops.pm_node }}'
+#     name: ansible-test-vm
+#     state: started

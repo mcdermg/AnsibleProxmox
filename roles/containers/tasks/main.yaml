@@ -1,3 +1,4 @@
+---
 - name: Download proxmox container templates
   community.general.proxmox_template:
     node: '{{ sops.pm_node }}'
