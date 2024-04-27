@@ -1,0 +1,14 @@
+#  pre-commit autoupdate
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0 # Version is release tag from https://github.com/pre-commit/pre-commit-hooks/tags
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/ansible-community/ansible-lint.git
+    rev: v24.2.2  # Version is release tag from https://github.com/ansible/ansible-lint/tags
+    hooks:
+      - id: ansible-lint
+        files: \.(yaml|yml)$
+        exclude: ^\.pre-commit-config\.yaml$

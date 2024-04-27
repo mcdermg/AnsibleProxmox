@@ -1,0 +1,29 @@
+---
+- name: Apt get updates
+  ansible.builtin.apt:
+    update-cache: true
+    cache_valid_time: 86400 # One day
+
+- name: Install aptitude and python3-proxmoxer
+  ansible.builtin.apt:
+    name:
+      - aptitude
+      - python3-proxmoxer
+    state: present
+    update_cache: false
+
+- name: Check for upgradeable packages
+  ansible.builtin.apt:
+    upgrade: true
+  check_mode: true
+  register: upgradable
+
+- name: Show Upgradable packages
+  ansible.builtin.debug:
+    msg: '{{ upgradable.stdout_lines }}'
+
+- name: Update and upgrade apt packages
+  ansible.builtin.apt:
+    upgrade: true
+    update_cache: true
+    cache_valid_time: 86400 # One day

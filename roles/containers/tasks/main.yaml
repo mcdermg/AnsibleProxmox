@@ -1,0 +1,39 @@
+- name: Download proxmox container templates
+  community.general.proxmox_template:
+    node: '{{ sops.pm_node }}'
+    api_user: '{{ sops.pm_api_user }}'
+    api_password: '{{ sops.pm_api_password }}'
+    api_host: '{{ sops.pm_api_host }}'
+    storage: local
+    content_type: vztmpl
+    template: '{{ item }}'
+  loop: '{{ sops.templates }}'
+
+- name: Create alpine container
+  community.general.proxmox:
+    api_user: '{{ sops.pm_api_user }}'
+    api_password: '{{ sops.pm_api_password }}'
+    api_host: '{{ sops.pm_api_host }}'
+    node: '{{ sops.pm_node }}'
+    # #vmid: 100
+    hostname: ansible-ct
+    password: 123456
+    ostemplate: 'local:vztmpl/alpine-3.19-default_20240207_amd64.tar.xz'
+    unprivileged: true
+    cores: 1
+    memory: 512
+    swap: 512
+    # #netif: '{"net0":"name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp"}'
+    netif: '{"net0":"name=eth0,bridge=vmbr0,ip=dhcp"}'
+    storage: 'local-lvm'
+    onboot: false
+
+- name: Start alpine container
+  community.general.proxmox:
+    api_user: '{{ sops.pm_api_user }}'
+    api_password: '{{ sops.pm_api_password }}'
+    api_host: '{{ sops.pm_api_host }}'
+    node: '{{ sops.pm_node }}'
+    hostname: ansible-ct
+    unprivileged: true
+    state: started

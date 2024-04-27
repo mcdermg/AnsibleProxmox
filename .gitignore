@@ -1,0 +1,19 @@
+# Ansible files
+.vault_pass
+vars.yaml
+
+# Vim swap files
+*.swp
+*.swo
+
+# Vagrant
+**/.vagrant
+**/.vagrant/*
+**/.vagrant/**
+
+# Used in new Pi OS bootstrap process see: https://www.raspberrypi.com/news/raspberry-pi-bullseye-update-april-2022/
+userconf
+ssh
+
+# Age key
+age.key

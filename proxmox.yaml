@@ -1,0 +1,12 @@
+- name: Proxmox
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    sops: "{{ lookup('community.sops.sops', 'vars.enc.yaml') | ansible.builtin.from_yaml }}"
+    ansible_user: '{{ sops.ansible_user }}'
+    ansible_ssh_pass: '{{ sops.ansible_ssh_pass }}'
+  roles:
+    - update
+    - containers
+    - vms
