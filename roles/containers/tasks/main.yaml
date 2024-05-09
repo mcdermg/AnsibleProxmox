@@ -2,9 +2,9 @@
 - name: Download proxmox container templates
   community.general.proxmox_template:
     node: '{{ sops.pm_node }}'
+    api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
-    api_host: '{{ sops.pm_api_host }}'
     storage: local
     content_type: vztmpl
     template: '{{ item }}'
@@ -12,9 +12,9 @@
 
 - name: Create alpine container
   community.general.proxmox:
+    api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
-    api_host: '{{ sops.pm_api_host }}'
     node: '{{ sops.pm_node }}'
     # #vmid: 100
     hostname: ansible-ct

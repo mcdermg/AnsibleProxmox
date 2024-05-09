@@ -1,0 +1,23 @@
+---
+- name: Create NFS directory
+  ansible.builtin.file:
+    path: /mnt/nfs-01
+    state: directory
+    mode: '0755'
+
+- name: Install NFS Kernel Server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+
+- name: Add NFS export to /etc/exports
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: "/mnt/nfs-01 192.168.0.0/16(rw,sync,fsid=0)"
+    mode: '0644'
+    create: true
+
+- name: Restart NFS Kernel Server
+  ansible.builtin.service:
+    name: nfs-kernel-server
+    state: restarted
