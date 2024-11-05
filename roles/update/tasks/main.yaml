@@ -27,3 +27,10 @@
     upgrade: true
     update_cache: true
     cache_valid_time: 86400 # One day
+
+- name: Ensure snippets directory exists
+  ansible.builtin.file:
+    path: /var/lib/vz/snippets
+    state: directory
+    mode: '0755'
+  become: true

@@ -1,0 +1,7 @@
+---
+- name: Restart SSH service
+  ansible.builtin.command: >
+    pct exec {{ sops.container_id }} -- service ssh restart
+  become: true
+  changed_when: "'Restarting sshd' in ssh_restart.stdout"
+  register: ssh_restart

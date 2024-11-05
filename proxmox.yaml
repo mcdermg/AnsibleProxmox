@@ -8,6 +8,5 @@
     ansible_ssh_pass: '{{ sops.ansible_ssh_pass }}'
   roles:
     - update
-    - nfs
     - containers
-    - vms
+#    - vms
