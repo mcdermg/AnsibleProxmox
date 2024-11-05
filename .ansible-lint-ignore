@@ -1,2 +1,3 @@
 # This file contains ignores rule violations for ansible-lint
 vars.enc.yaml yaml[line-length]
+roles/containers/tasks/main.yaml no-changed-when
