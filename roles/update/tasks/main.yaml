@@ -28,9 +28,29 @@
     update_cache: true
     cache_valid_time: 86400 # One day
 
-- name: Ensure snippets directory exists
+- name: Ensure sudo package is installed
+  ansible.builtin.package:
+    name: sudo
+    state: present
+
+- name: Generate required locales
+  ansible.builtin.command:
+    cmd: locale-gen en_IE.UTF-8 en_US.UTF-8
+    creates: /usr/lib/locale/en_US.utf8
+  become: true
+
+- name: Set default locale
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    line: 'LANG=en_US.UTF-8'
+    create: true
+    mode: '0644'
+  become: true
+
+- name: Ensure correct permissions for locale file
   ansible.builtin.file:
-    path: /var/lib/vz/snippets
-    state: directory
-    mode: '0755'
+    path: /etc/default/locale
+    owner: root
+    group: root
+    mode: '0644'
   become: true
