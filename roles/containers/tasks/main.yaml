@@ -10,13 +10,6 @@
     template: '{{ item }}'
   loop: '{{ sops.templates }}'
 
-- name: Copy container initialization hook script
-  ansible.builtin.template:
-    src: startup.sh.j2
-    dest: '/var/lib/vz/snippets/startup.sh'
-    mode: '0775'
-  become: true
-
 - name: Create container
   community.general.proxmox:
     api_host: '{{ sops.pm_api_host }}'
@@ -26,27 +19,16 @@
     vmid: '{{ sops.container_id }}'
     hostname: ansible-ct-01
     password: password
+    pubkey: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
     ostemplate: 'local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst' # TODO make more dynamic to get from var
     unprivileged: true
-    cores: 2
-    memory: 2048
+    cores: 1
+    memory: 1024
     swap: 512
-    netif: '{"net0":"name=eth0,gw=192.168.0.1,ip=192.168.0.72/24,bridge=vmbr0"}'
+    netif: '{"net0":"name=eth0,gw=192.168.0.1,ip=192.168.0.72/24,bridge=vmbr0"}' # TODO more dynamic IP address
     storage: 'local-lvm'
-    onboot: false
+    onboot: true
   register: create_container
-
-# #- name: Add hookscript to container
-# #  ansible.builtin.command: >
-# #    pct set {{ sops.container_id }} --hookscript local:snippets/startup.sh
-# #  become: true
-
-# #- name: Add startup script mount point to container config
-# #  ansible.builtin.lineinfile:
-# #    path: "/etc/pve/lxc/{{ sops.container_id }}.conf"
-# #    line: "lxc.mount.entry=/var/lib/vz/snippets/startup.sh root/startup.sh none bind 0 0"
-# #    state: present
-# #  become: true
 
 - name: Sleep for 4 seconds
   ansible.builtin.pause:
@@ -61,22 +43,3 @@
     hostname: ansible-ct-01
     unprivileged: true
     state: started
-
-# #- name: Update ssh settings
-# #  ansible.builtin.command: >
-# #    pct exec {{ sops.container_id }} -- sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-# #  become: true
-
-- name: Update ssh settings
-  ansible.builtin.command: >
-    pct exec {{ sops.container_id }} -- sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-  become: true
-  notify: Restart SSH service
-
-# #- name: Restart SSH service if configuration changed
-# #  ansible.builtin.command: >
-# #    pct exec {{ sops.container_id }} -- service ssh restart
-# #  become: true
-# #  when: ssh_config_changed.changed
-
-# rm startup.sh ; rm container-init.sh; pct shutdown 111; pct destroy 111 --purge

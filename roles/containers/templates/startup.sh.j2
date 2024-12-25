@@ -1,2 +1,28 @@
 #!/bin/bash
-echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+
+# Variables from Proxmox
+# $VMID: Container ID
+# $PHASE: Event phase
+
+log() {
+    logger -t "container-init[$VMID]" "$1"
+}
+
+setup_container() {
+    pct exec $VMID -- bash -c "
+        apt-get update &&
+        apt-get install -y openssh-server &&
+        sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config &&
+        systemctl enable ssh &&
+        systemctl start ssh
+    "
+}
+
+case "$PHASE" in
+    post-start)
+        sleep 5  # Wait for network
+        setup_container
+        ;;
+esac
+
+exit 0
