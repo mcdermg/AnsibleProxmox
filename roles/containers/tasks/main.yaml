@@ -8,7 +8,7 @@
     storage: local
     content_type: vztmpl
     template: '{{ item }}'
-  loop: '{{ sops.templates }}'
+  loop: '{{ sops.templates_unencrypted }}'
 
 - name: Create container
   community.general.proxmox:
@@ -16,7 +16,7 @@
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
     node: '{{ sops.pm_node }}'
-    vmid: '{{ sops.container_id }}'
+    vmid: '{{ sops.container_id_unencrypted }}'
     hostname: ansible-ct-01
     password: password
     pubkey: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"

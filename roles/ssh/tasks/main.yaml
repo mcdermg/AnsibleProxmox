@@ -35,52 +35,52 @@
 
 - name: Hash password
   ansible.builtin.set_fact:
-    hashed_password: "{{ user_password | password_hash('sha512') }}"
+    hashed_password: "{{ ssh_user_password | password_hash('sha512') }}"
 
-- name: Create user {{ user }}
+- name: Create user {{ ssh_user }}
   ansible.builtin.user:
-    name: '{{ user }}'
+    name: '{{ ssh_user }}'
     password: '{{ hashed_password }}'
     state: present
   become: true
 
-- name: Ensure ~/.ssh directory exists for user {{ user }}
+- name: Ensure ~/.ssh directory exists for user {{ ssh_user }}
   ansible.builtin.file:
-    path: '/home/{{ user }}/.ssh'
+    path: '/home/{{ ssh_user }}/.ssh'
     state: directory
     mode: '0700'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
   become: true
 
-- name: Add local public SSH key to authorized keys for user {{ user }}
+- name: Add local public SSH key to authorized keys for user {{ ssh_user }}
   ansible.builtin.copy:
     src: ~/.ssh/id_rsa.pub
-    dest: '/home/{{ user }}/.ssh/authorized_keys'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    dest: '/home/{{ ssh_user }}/.ssh/authorized_keys'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
     mode: '0600'
   become: true
 
-- name: Set permissions on ~/.ssh directory for  user {{ user }}
+- name: Set permissions on ~/.ssh directory for  user {{ ssh_user }}
   ansible.builtin.file:
-    path: '/home/{{ user }}/.ssh'
+    path: '/home/{{ ssh_user }}/.ssh'
     mode: '0700'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
   become: true
 
-- name: Set permissions on authorized_keys file for user {{ user }}
+- name: Set permissions on authorized_keys file for user {{ ssh_user }}
   ansible.builtin.file:
-    path: '/home/{{ user }}/.ssh/authorized_keys'
+    path: '/home/{{ ssh_user }}/.ssh/authorized_keys'
     mode: '0600'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
   become: true
 
 - name: Add user to sudoers group
   ansible.builtin.user:
-    name: '{{ user }}'
+    name: '{{ ssh_user }}'
     groups: sudo
     append: true
   become: true
@@ -88,8 +88,8 @@
 - name: Ensure user has sudo privileges without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers
-    regexp: '^#?{{ user }}'
-    line: '{{ user }} ALL=(ALL) NOPASSWD:ALL'
+    regexp: '^#?{{ ssh_user }}'
+    line: '{{ ssh_user }} ALL=(ALL) NOPASSWD:ALL'
     validate: 'visudo -cf %s'
   become: true
 
@@ -100,33 +100,33 @@
 
 - name: Add user to pve group
   ansible.builtin.user:
-    name: '{{ user }}'
+    name: '{{ ssh_user }}'
     groups: root
     append: true
   become: true
 
-- name: Add Proxmox CLI tools to PATH for user {{ user }}
+- name: Add Proxmox CLI tools to PATH for user {{ ssh_user }}
   ansible.builtin.lineinfile:
-    path: '/home/{{ user }}/.bashrc'
+    path: '/home/{{ ssh_user }}/.bashrc'
     line: 'export PATH=$PATH:/usr/sbin:/sbin'
     create: true
     mode: '0644'
   become: true
 
-- name: Set permissions on .bashrc for user {{ user }}
+- name: Set permissions on .bashrc for user {{ ssh_user }}
   ansible.builtin.file:
-    path: '/home/{{ user }}/.bashrc'
+    path: '/home/{{ ssh_user }}/.bashrc'
     mode: '0644'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
   become: true
 
-- name: Set permissions on .bashrc for user {{ user }}
+- name: Set permissions on .bashrc for user {{ ssh_user }}
   ansible.builtin.file:
-    path: '/home/{{ user }}/.bashrc'
+    path: '/home/{{ ssh_user }}/.bashrc'
     mode: '0644'
-    owner: '{{ user }}'
-    group: '{{ user }}'
+    owner: '{{ ssh_user }}'
+    group: '{{ ssh_user }}'
   become: true
 
 - name: Add Proxmox CLI tools to PATH system-wide

@@ -6,8 +6,8 @@
     sops: "{{ lookup('community.sops.sops', 'vars.enc.yaml') | ansible.builtin.from_yaml }}"
     ansible_user: '{{ sops.ansible_user }}'
     ansible_ssh_pass: '{{ sops.ansible_ssh_pass }}'
-    user: '{{ sops.user }}'
-    user_password: '{{ sops.ansible_ssh_pass }}'
+    ssh_user: '{{ sops.ssh_user }}'
+    ssh_user_password: '{{ sops.ansible_ssh_pass }}'
   roles:
     - update
 #    - ssh
