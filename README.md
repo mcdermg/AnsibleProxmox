@@ -60,9 +60,11 @@ We also specify the SOPS binary location the `ansible.cfg` as per the `community
 
 ## Playbook
 
-The playbook is currently split into 3 roles:
+The playbook is currently split into different roles:
 
 - update
+- ssh
+- nfs
 - containers
 - vms
 
@@ -70,8 +72,20 @@ These logical groupings should cover activities carried out in each of the roles
 
 The update section is focused on updating the underlying OS used by Proxmox.
 
+The ssh section adds an additional ssh user that is non root proxmox user and allows password login etc.
+
+The NFS is to add NFS from dual bay enclosure for more storage for the Proxmox server.
+
 The remaining roles, containers and vms are targeted at managing the various Proxmox constructs fort hose two areas within proxmox itself.
 
+
+### Ansible dependencies
+
+The `requirements.yaml` file contains some dependencies that ma need to be installed locally via running the following command form the root of the repo:
+
+``` bash
+ansible-galaxy collection install -r ./requirements.yaml
+```
 
 ### Proxmox credentials
 
