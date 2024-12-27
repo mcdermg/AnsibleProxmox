@@ -1,0 +1,36 @@
+---
+# Infrastructure settings
+vms_storage_pool: 'local-lvm'
+vms_vm_network_bridge: 'vmbr0'
+vms_base_ip: '192.168.0'
+vms_existing_template: '9000'
+
+# SSH key configuration
+vms_pubkey: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
+
+# Node definitions
+vms_nodes:
+  - name: 'k3s-main-01'
+    id: 205
+    ip_last_octet: 85
+    cpu: 2
+    memory: 4096
+    type: 'control'
+  - name: 'k3s-worker-01'
+    id: 206
+    ip_last_octet: 86
+    cpu: 2
+    memory: 2048
+    type: 'worker'
+  - name: 'k3s-worker-02'
+    id: 207
+    ip_last_octet: 87
+    cpu: 2
+    memory: 2048
+    type: 'worker'
+  - name: 'k3s-worker-03'
+    id: 208
+    ip_last_octet: 88
+    cpu: 2
+    memory: 2048
+    type: 'worker'
