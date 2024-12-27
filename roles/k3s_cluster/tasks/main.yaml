@@ -1,0 +1,44 @@
+# roles/k3sCluster/tasks/main.yaml
+---
+# Install on control plane first
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/get_k3s.sh
+    mode: '0755'
+  tags: k3s
+  when: inventory_hostname in groups['k3s_control']
+
+- name: Install K3s server on control plane
+  ansible.builtin.command: |
+    /bin/bash -c 'set -o pipefail && /tmp/get_k3s.sh sh -s - server \
+      --node-ip={{ ansible_host }} \
+      --write-kubeconfig-mode 644 \
+      --disable traefik'
+  register: k3s_server
+  changed_when: false
+  tags: k3s
+  when: inventory_hostname in groups['k3s_control']
+
+- name: Get node token from control plane
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: node_token
+  tags: k3s
+  when: inventory_hostname in groups['k3s_control']
+
+- name: Download K3s install script on worker nodes
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/get_k3s.sh
+    mode: '0755'
+  tags: k3s
+  when: inventory_hostname in groups['k3s_workers']
+
+- name: Join worker nodes to cluster
+  ansible.builtin.command: |
+    /bin/bash -c 'set -o pipefail && /tmp/get_k3s.sh K3S_URL=https://192.168.0.85:6443 \
+      K3S_TOKEN={{ hostvars["k3s-main-01"]["node_token"]["content"] | b64decode }} sh -'
+  changed_when: false
+  tags: k3s
+  when: inventory_hostname in groups['k3s_workers']
