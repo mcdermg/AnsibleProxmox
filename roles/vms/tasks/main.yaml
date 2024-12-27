@@ -1,21 +1,35 @@
 # roles/vms/tasks/main.yaml
 ---
-# Step 1: Clone VMs
 - name: Clone template for each node
   community.general.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
     node: '{{ sops.pm_node }}'
-    clone: '{{ existing_template }}'
-    vmid: '{{ existing_template }}'
+    clone: '{{ vms_existing_template }}'
+    vmid: '{{ vms_existing_template }}'
     newid: '{{ item.id }}'
     name: '{{ item.name }}'
-    storage: '{{ storage_pool }}'
-  loop: "{{ nodes }}"
+    storage: '{{ vms_storage_pool }}'
+  loop: "{{ vms_nodes }}"
   register: cloned_vms
 
-# Step 2: Update VM Configurations
+- name: Ensure /root/home-lab directory exists
+  ansible.builtin.file:
+    path: /root/home-lab
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Add cloud-init resize commands
+  ansible.builtin.shell: |
+    qm resize {{ item.id }} scsi0 +7G
+    touch /root/home-lab/{{ item.id }}-scsi0-resized
+  args:
+    creates: '/root/home-lab/{{ item.id }}-scsi0-resized'
+  loop: "{{ vms_nodes }}"
+  when: cloned_vms is success
+
 - name: Update VM configurations
   community.general.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
@@ -27,14 +41,13 @@
     memory: '{{ item.memory }}'
     ciuser: '{{ sops.k3s_ciuser }}'
     cipassword: '{{ sops.k3s_cipassword }}'
-    sshkeys: '{{ pubkey }}'
+    sshkeys: '{{ vms_pubkey }}'
     ipconfig:
-      ipconfig0: 'ip={{ base_ip }}.{{ item.ip_last_octet }}/24,gw={{ base_ip }}.1'
+      ipconfig0: 'ip={{ vms_base_ip }}.{{ item.ip_last_octet }}/24,gw={{ vms_base_ip }}.1'
     update: true
-  loop: "{{ nodes }}"
+  loop: "{{ vms_nodes }}"
   when: cloned_vms is success
 
-# Step 3: Start VMs
 - name: Start VMs
   community.general.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
@@ -43,12 +56,13 @@
     node: '{{ sops.pm_node }}'
     vmid: '{{ item.id }}'
     state: started
-  loop: "{{ nodes }}"
+  loop: "{{ vms_nodes }}"
+  when: cloned_vms is success
 
-# Step 4: Wait for VMs
 - name: Wait for VMs to be ready
   ansible.builtin.wait_for:
-    host: "{{ base_ip }}.{{ item.ip_last_octet }}"
+    host: "{{ vms_base_ip }}.{{ item.ip_last_octet }}"
     port: 22
     timeout: 180
-  loop: "{{ nodes }}"
+  loop: "{{ vms_nodes }}"
+  when: cloned_vms is success

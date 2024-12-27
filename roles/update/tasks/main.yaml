@@ -39,6 +39,13 @@
     creates: /usr/lib/locale/en_US.utf8
   become: true
 
+- name: Check current default locale
+  ansible.builtin.command:
+    cmd: 'grep LANG= /etc/default/locale'
+  register: current_locale
+  ignore_errors: true
+  changed_when: false
+
 - name: Set default locale
   ansible.builtin.lineinfile:
     path: /etc/default/locale
@@ -46,6 +53,7 @@
     create: true
     mode: '0644'
   become: true
+  when: current_locale.stdout.find('LANG=en_US.UTF-8') == -1
 
 - name: Ensure correct permissions for locale file
   ansible.builtin.file:

@@ -9,8 +9,8 @@
     ssh_user: '{{ sops.ssh_user }}'
     ssh_user_password: '{{ sops.ansible_ssh_pass }}'
   roles:
-    - role: update
-      when: inventory_hostname in groups['proxmox']
+#    - role: update
+#      when: inventory_hostname in groups['proxmox']
 #    - role: ssh
 #      when: inventory_hostname in groups['proxmox']
 #    - role: nfs
@@ -19,6 +19,6 @@
 #      when: inventory_hostname in groups['proxmox']
     - role: vms
       when: inventory_hostname in groups['proxmox']
-    - role: k3s_cluster
-      when: inventory_hostname in groups['k3s']
-      tags: ['k3s']
+#    - role: k3s_cluster
+#      when: inventory_hostname in groups['k3s']
+#      tags: ['k3s']

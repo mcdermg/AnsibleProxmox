@@ -7,9 +7,7 @@
     dest: /tmp/get_k3s.sh
     mode: '0755'
   tags: k3s
-  when:
-    - inventory_hostname == 'k3s-main-01'
-    - k3s_nodes is defined
+  when: inventory_hostname in groups['k3s_control']
 
 - name: Install K3s server on control plane
   ansible.builtin.command: |
@@ -20,18 +18,14 @@
   register: k3s_server
   changed_when: false
   tags: k3s
-  when:
-    - inventory_hostname == 'k3s-main-01'
-    - k3s_nodes is defined
+  when: inventory_hostname in groups['k3s_control']
 
 - name: Get node token from control plane
   ansible.builtin.slurp:
     src: /var/lib/rancher/k3s/server/node-token
   register: node_token
   tags: k3s
-  when:
-    - inventory_hostname == 'k3s-main-01'
-    - k3s_nodes is defined
+  when: inventory_hostname in groups['k3s_control']
 
 - name: Download K3s install script on worker nodes
   ansible.builtin.get_url:
@@ -39,9 +33,7 @@
     dest: /tmp/get_k3s.sh
     mode: '0755'
   tags: k3s
-  when:
-    - "'k3s-worker' in inventory_hostname"
-    - k3s_nodes is defined
+  when: inventory_hostname in groups['k3s_workers']
 
 - name: Join worker nodes to cluster
   ansible.builtin.command: |
@@ -49,6 +41,4 @@
       K3S_TOKEN={{ hostvars["k3s-main-01"]["node_token"]["content"] | b64decode }} sh -'
   changed_when: false
   tags: k3s
-  when:
-    - "'k3s-worker' in inventory_hostname"
-    - k3s_nodes is defined
+  when: inventory_hostname in groups['k3s_workers']
