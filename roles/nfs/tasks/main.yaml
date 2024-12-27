@@ -1,23 +1,57 @@
 ---
-- name: Create NFS directory
-  ansible.builtin.file:
-    path: /mnt/nfs-01
-    state: directory
-    mode: '0755'
+# #- name: Create NFS directory
+#  ansible.builtin.file:
+#    path: /mnt/nfs-01
+#    state: directory
+#    mode: '0755'
+#
+# #- name: Install NFS Kernel Server
+#  ansible.builtin.apt:
+#    name: nfs-kernel-server
+#    state: present
+#
+# #- name: Add NFS export to /etc/exports
+#  ansible.builtin.lineinfile:
+#    path: /etc/exports
+#    line: "/mnt/nfs-01 192.168.0.0/16(rw,sync,fsid=0)"
+#    mode: '0644'
+#    create: true
+#
+# #- name: Restart NFS Kernel Server
+#  ansible.builtin.service:
+#    name: nfs-kernel-server
+#    state: restarted
 
-- name: Install NFS Kernel Server
+- name: Install NFS server
   ansible.builtin.apt:
     name: nfs-kernel-server
     state: present
+    update_cache: false
 
-- name: Add NFS export to /etc/exports
-  ansible.builtin.lineinfile:
-    path: /etc/exports
-    line: "/mnt/nfs-01 192.168.0.0/16(rw,sync,fsid=0)"
+- name: Create mount point
+  ansible.builtin.file:
+    path: '{{ sops.mount_point_unencrypted }}'
+    state: directory
+    mode: '0777'
+    owner: nobody
+    group: nogroup
+
+- name: Get PARTUUID for device
+  ansible.builtin.command: "blkid -s PARTUUID -o value /dev/sdb1"
+  register: partuuid_output
+  changed_when: false
+
+- name: Add mount to fstab
+  ansible.posix.mount:
+    path: '{{ sops.mount_point_unencrypted }}'
+    src: 'PARTUUID={{ partuuid_output.stdout }}'
+    fstype: ext4
+    opts: defaults,noatime,nodiratime
+    state: mounted
+
+- name: Configure exports
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
     mode: '0644'
-    create: true
-
-- name: Restart NFS Kernel Server
-  ansible.builtin.service:
-    name: nfs-kernel-server
-    state: restarted
+  notify: Reload nfs
