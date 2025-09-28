@@ -87,6 +87,15 @@ The `requirements.yaml` file contains some dependencies that ma need to be insta
 ansible-galaxy collection install -r ./requirements.yaml
 ```
 
+Python dependencies for password hashing (if using pipx for Ansible):
+
+``` bash
+pipx inject ansible-core "proxmoxer>=2.0"
+pipx inject ansible-core passlib
+```
+
+May require `--force` if older dependencies in place.
+
 ### Proxmox credentials
 
 See the encrypted vars files but re using some details that were manually setup for a Terraform user. May need to re-visit this and have Ansible actually provision a user and a role to be used in this playbook. Split the auth setup from the actual VM & container management.
@@ -101,3 +110,14 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
 
 The password has been redacted above but can be viewed in the encrypted vars file, `vars.enc.yaml`, or in the unencrypted `vars.yaml`.
+
+
+### Run the playbook
+
+Verify that the `proxmox.yaml` is running all required tasks and all information in `hosts.ini` is still valid and correct.
+
+To run execute:
+
+```
+ansible-playbook proxmox.yaml
+```

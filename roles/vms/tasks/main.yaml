@@ -1,7 +1,7 @@
 # roles/vms/tasks/main.yaml
 ---
 - name: Clone template for each node
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
@@ -31,7 +31,7 @@
   when: cloned_vms is success
 
 - name: Update VM configurations
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
@@ -49,7 +49,7 @@
   when: cloned_vms is success
 
 - name: Start VMs
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'

@@ -1,6 +1,6 @@
 ---
 - name: Download proxmox container templates
-  community.general.proxmox_template:
+  community.proxmox.proxmox_template:
     node: '{{ sops.pm_node }}'
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
@@ -10,8 +10,19 @@
     template: '{{ item }}'
   loop: '{{ sops.templates_unencrypted }}'
 
+- name: Check if container exists
+  community.proxmox.proxmox:
+    api_host: '{{ sops.pm_api_host }}'
+    api_user: '{{ sops.pm_api_user }}'
+    api_password: '{{ sops.pm_api_password }}'
+    node: '{{ sops.pm_node }}'
+    vmid: '{{ sops.container_id_unencrypted }}'
+    state: current
+  register: container_status
+  ignore_errors: true
+
 - name: Create container
-  community.general.proxmox:
+  community.proxmox.proxmox:
     api_host: '{{ sops.pm_api_host }}'
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
@@ -29,17 +40,19 @@
     storage: 'local-lvm'
     onboot: true
   register: create_container
+  when: container_status.failed
 
 - name: Sleep for 4 seconds
   ansible.builtin.pause:
     seconds: 4
+  when: container_status.failed
 
 - name: Start container
-  community.general.proxmox:
+  community.proxmox.proxmox:
     api_user: '{{ sops.pm_api_user }}'
     api_password: '{{ sops.pm_api_password }}'
     api_host: '{{ sops.pm_api_host }}'
     node: '{{ sops.pm_node }}'
-    hostname: ansible-ct-01
-    unprivileged: true
+    vmid: '{{ sops.container_id_unencrypted }}'
     state: started
+  when: container_status.failed

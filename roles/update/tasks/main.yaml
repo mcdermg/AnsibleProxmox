@@ -4,11 +4,12 @@
     update-cache: true
     cache_valid_time: 86400 # One day
 
-- name: Install aptitude and python3-proxmoxer
+- name: Install packages - aptitude, python3-proxmoxer, python3-pip
   ansible.builtin.apt:
     name:
       - aptitude
       - python3-proxmoxer
+      - python3-pip
     state: present
     update_cache: false
 
@@ -32,6 +33,16 @@
   ansible.builtin.package:
     name: sudo
     state: present
+
+- name: Remove unnecessary packages
+  ansible.builtin.apt:
+    autoremove: true
+
+- name: Upgrade proxmoxer to latest version via pip
+  ansible.builtin.pip:
+    name: proxmoxer>=2.0
+    state: present
+    break_system_packages: true
 
 - name: Generate required locales
   ansible.builtin.command:
